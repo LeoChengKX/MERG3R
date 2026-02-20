@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="MERG3R: A training-free divide-and-conquer framework that enables geometric foundation models to scale to large, unordered image collections far beyond their native memory limits.">
+  <meta name="keywords" content="MERG3R, 3D reconstruction, neural visual geometry, VGGT, divide-and-conquer, bundle adjustment, structure from motion">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MERG3R: A Divide-and-Conquer Approach to Large-Scale Neural Visual Geometry</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/js/bulma-carousel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+    }
+    .footer .icon-link {
+      font-size: 25px;
+      color: #000;
+    }
+    .link-block a {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+    .teaser .hero-body {
+      padding-top: 0;
+      padding-bottom: 3rem;
+    }
+    .teaser {
+      font-family: 'Google Sans', sans-serif;
+    }
+    .publication-title {
+      font-family: 'Google Sans', sans-serif;
+    }
+    .publication-authors {
+      font-family: 'Google Sans', sans-serif;
+    }
+    .publication-venue {
+      color: #555;
+      width: fit-content;
+      font-weight: bold;
+    }
+    .publication-authors a {
+      color: hsl(204, 86%, 53%) !important;
+    }
+    .publication-authors a:hover {
+      text-decoration: underline;
+    }
+    .author-block {
+      display: inline-block;
+    }
+    .publication-video {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%;
+      overflow: hidden;
+      border-radius: 10px !important;
+    }
+    .publication-video iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .publication-video video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+    }
+    .results-carousel {
+      overflow: hidden;
+      padding: 1rem 0;
+    }
+    .results-carousel .item {
+      margin: 1rem;
+      overflow: hidden;
+      padding: 1.5rem;
+      font-size: 0;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+    .results-carousel .item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      margin: 0;
+    }
+    .results-carousel .item .subtitle {
+      font-size: 1rem !important;
+      color: #555;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+    .method-figure img {
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.10);
+    }
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .step-card {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 18px 16px;
+    }
+    .step-card .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: hsl(204, 86%, 40%);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .step-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-family: 'Google Sans', sans-serif;
+    }
+    .step-card p {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+    }
+    .result-subsection {
+      margin-top: 2rem;
+    }
+    .result-subsection:first-child {
+      margin-top: 1rem;
+    }
+    .result-subsection .title.is-4 {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+    .result-fig {
+      margin-bottom: 2rem;
+    }
+    .result-fig img {
+      border-radius: 8px;
+      box-shadow: 0 1px 8px rgba(0,0,0,.10);
+      width: 100%;
+    }
+    .bibtex-pre {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 20px;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+    .equal-note {
+      font-size: 13px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+
+<!-- ══════════════ HERO / TITLE ══════════════ -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h1 class="title is-1 publication-title">
+            MERG3R: A Divide-and-Conquer Approach to Large-Scale Neural Visual Geometry
+          </h1>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><a href="https://www.linkedin.com/in/leo-kaixuan-cheng-a4912a322" target="_blank">Leo Kaixuan Cheng</a><sup>1,*</sup>,</span>
+            <span class="author-block"><a href="https://www.linkedin.com/in/abdusshaikh" target="_blank">Abdus Shaikh</a><sup>1,*</sup>,</span>
+            <span class="author-block"><a href="https://nexuslrf.github.io/" target="_blank">Ruofan Liang</a><sup>1,2</sup>,</span>
+            <span class="author-block"><a href="https://zhijiew94.github.io/" target="_blank">Zhijie Wu</a><sup>1,2</sup>,</span>
+            <span class="author-block"><a href="https://gavinguan95.github.io/" target="_blank">Yushi Guan</a><sup>1,2</sup>,</span>
+            <span class="author-block"><a href="https://www.cs.toronto.edu/~nandita/" target="_blank">Nandita Vijaykumar</a><sup>1,2</sup></span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 8px;">
+            <span class="author-block"><sup>1</sup>University of Toronto,</span>
+            <span class="author-block"><sup>2</sup>Vector Institute</span>
+          </div>
+          <div class="equal-note" style="margin-top: 4px;">* Equal contribution</div>
+
+          <div class="column has-text-centered" style="margin-top: 16px;">
+            <div class="publication-links">
+              <!-- arXiv -->
+              <span class="link-block">
+                <a href="https://arxiv.org" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Code -->
+              <span class="link-block">
+                <a href="https://github.com" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code (Coming Soon)</span>
+                </a>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ TEASER ══════════════ -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="assets/figures/final_teaser.png"
+           alt="Given 1,000 unordered images, MERG3R reconstructs accurate camera poses and a high-quality point cloud."
+           style="border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,.12);">
+      <h2 class="subtitle has-text-centered" style="margin-top: 1rem;">
+        Given a large unordered set of <strong>1,000 input images</strong>, <strong>MERG3R</strong>
+        reconstructs accurate camera poses and a high-quality point cloud. Despite the long sequence
+        and challenging viewpoints, our pipeline remains stable and scalable.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ ABSTRACT + VIDEO ══════════════ -->
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- Abstract -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Recent advancements in neural visual geometry, including transformer-based models such as
+            VGGT and Pi3, have achieved impressive accuracy on 3D reconstruction tasks. However, their
+            reliance on full attention makes them fundamentally limited by GPU memory capacity,
+            preventing them from scaling to large, unordered image collections.
+            We introduce <strong>MERG3R</strong>, a training-free divide-and-conquer framework that
+            enables geometric foundation models to operate far beyond their native memory limits.
+            MERG3R first reorders and partitions unordered images into overlapping, geometrically
+            diverse subsets that can be reconstructed independently. It then merges the resulting
+            local reconstructions through an efficient global alignment and confidence-weighted bundle
+            adjustment procedure, producing a globally consistent 3D model.
+            Our framework is model-agnostic and can be paired with existing neural geometry models.
+            Across large-scale datasets&mdash;including 7-Scenes, NRGBD, Tanks &amp; Temples, and
+            Cambridge Landmarks&mdash;MERG3R consistently improves reconstruction accuracy, memory
+            efficiency, and scalability, enabling high-quality reconstruction when the dataset
+            exceeds memory capacity limits.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Method Overview Video</h2>
+        <div class="publication-video">
+          <video controls autoplay loop muted preload="metadata" style="max-width:100%;">
+            <source src="assets/videos/method_overview.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════ METHOD ══════════════ -->
+<section class="section" style="background: #fafafa;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method</h2>
+
+    <!-- Pipeline figure -->
+    <div class="method-figure has-text-centered" style="margin-bottom: 1.5rem;">
+      <img src="assets/figures/pipeline_overview.png"
+           alt="MERG3R pipeline overview"
+           style="width: 100%; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.10);">
+      <p class="has-text-centered" style="margin-top: 0.75rem; font-size: 14px; color: #555;">
+        <strong>MERG3R pipeline.</strong>
+        (i) A visual-similarity graph is built and a pseudo-temporal ordering is found via Hamiltonian path.
+        (ii) Images are partitioned into overlapping subsets using interleaved sampling for geometric diversity.
+        (iii) Each subset is reconstructed independently by a pretrained geometric foundation model.
+        (iv) Submaps are aligned via Sim(3) and globally refined with confidence-weighted bundle adjustment.
+      </p>
+    </div>
+
+    <!-- Step cards -->
+    <div class="step-grid">
+      <div class="step-card">
+        <div class="step-num">Step 1</div>
+        <h3>Image Ordering</h3>
+        <p>DINO-based visual similarity is used to approximate a Hamiltonian path, producing a pseudo-temporal ordering that maximizes visual continuity.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Step 2</div>
+        <h3>Interleaved Partitioning</h3>
+        <p>Images are re-permuted with interleaved sampling to ensure geometric diversity within each cluster, then split into overlapping windows that fit in GPU memory.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Step 3</div>
+        <h3>Local Reconstruction</h3>
+        <p>Each subset is processed independently by a geometric foundation model (VGGT, Pi3) to predict camera parameters, dense depth maps, and confidence scores.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Step 4</div>
+        <h3>Global Alignment &amp; BA</h3>
+        <p>Submaps are aligned via confidence-weighted Sim(3) estimation. Point tracks built with SuperPoint + LightGlue are refined with gradient-based bundle adjustment.</p>
+      </div>
+    </div>
+
+    <!-- Image partition figure -->
+    <div class="method-figure has-text-centered" style="margin-top: 2.5rem;">
+      <img src="assets/figures/image_partition.png"
+           alt="Image partitioning process"
+           style="width: 100%; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.10);">
+      <p class="has-text-centered" style="margin-top: 0.75rem; font-size: 14px; color: #555;">
+        <strong>Image partitioning.</strong>
+        We compute a visual-similarity matrix and find a Hamiltonian path (red) to produce a pseudo-video sequence.
+        Images are then reordered by interleaved sampling and divided into overlapping clusters.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════ RESULTS ══════════════ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Results</h2>
+
+      <!-- ── Efficiency ── -->
+      <div class="result-subsection">
+        <h3 class="title is-4 has-text-centered">Efficiency</h3>
+        <div class="columns is-centered">
+          <div class="column">
+            <div class="result-fig">
+              <img src="assets/figures/memory_comparison_chart.png"
+                    alt="GPU memory comparison">
+              <p class="has-text-centered" style="margin-top: 0.6rem; font-size: 14px; color: #555;">
+                <strong>GPU memory usage.</strong>
+                MERG3R dramatically reduces peak GPU memory, enabling reconstruction of 1,000+ image datasets.
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="result-fig">
+              <img src="assets/figures/runtime_comparison_chart.png"
+                    alt="Runtime comparison">
+              <p class="has-text-centered" style="margin-top: 0.6rem; font-size: 14px; color: #555;">
+                <strong>Runtime comparison.</strong>
+                Our divide-and-conquer design keeps runtime tractable as the number of images scales to thousands.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- ── Camera Pose Estimation ── -->
+    <div class="result-subsection">
+      <h3 class="title is-4 has-text-centered">Camera Pose Estimation</h3>
+
+      <div class="columns is-centered is-vcentered">
+        <div class="column is-narrow has-text-centered">
+          <figure class="result-fig">
+            <img src="assets/figures/cam_pose/tab_7_scenes.png" alt="Camera pose estimation on 7-Scenes" style="max-width: 420px; width: 100%; height: auto;">
+            <figcaption style="margin-top: 0.6rem; font-size: 13px; color: #555;">
+              Camera pose estimation on <strong>7-Scenes</strong><br>(RRA@30↑, RTA@30↑, AUC@30↑) with 500 and 1,000 images.
+            </figcaption>
+          </figure>
+        </div>
+        <div class="column is-narrow has-text-centered">
+          <figure class="result-fig">
+            <img src="assets/figures/cam_pose/tab_tnt.png" alt="Camera pose estimation on Tanks and Temples and Cambridge Landmarks" style="max-width: 420px; width: 100%; height: auto;">
+            <figcaption style="margin-top: 0.6rem; font-size: 13px; color: #555;">
+              Camera pose estimation on <strong>Tanks &amp; Temples</strong><br>and <strong>Cambridge Landmarks</strong> (ATE↓, RRE↓, RTE↓).
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <!-- Trajectory visualization -->
+      <p class="has-text-centered" style="font-size: 14px; color: #555; margin-bottom: 0.75rem;">
+        <strong>Qualitative trajectory comparison</strong> on a 300-image Cambridge Landmarks sequence.
+        Estimated poses (red) vs. ground truth (green).
+      </p>
+      <div class="columns is-centered is-vcentered">
+        <div class="column has-text-centered">
+          <img src="assets/figures/traj_ttt3r.png" alt="TTT3R trajectory" style="width: 100%; height: auto;">
+          <p style="font-size: 13px; color: #555; margin-top: 0.4rem;">(a) TTT3R</p>
+        </div>
+        <div class="column has-text-centered">
+          <img src="assets/figures/traj_pi3_baseline.png" alt="π³ baseline trajectory" style="width: 100%; height: auto;">
+          <p style="font-size: 13px; color: #555; margin-top: 0.4rem;">(b) π³</p>
+        </div>
+        <div class="column has-text-centered">
+          <img src="assets/figures/traj_pi3_ours.png" alt="Ours + π³ trajectory" style="width: 100%; height: auto;">
+          <p style="font-size: 13px; color: #555; margin-top: 0.4rem;">(c) Ours + π³</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- <div class="result-subsection">
+      <h3 class="title is-4 has-text-centered">Qualitative Results</h3>
+      <div class="result-fig">
+        <img src="assets/figures/qualitative_results.png"
+             alt="Qualitative reconstruction results">
+        <p class="has-text-centered" style="margin-top: 0.6rem; font-size: 14px; color: #555;">
+          <strong>Qualitative comparisons.</strong>
+          MERG3R produces higher-quality point clouds and more accurate camera trajectories
+          than baseline methods across indoor and outdoor large-scale scenes.
+        </p>
+      </div>
+    </div> -->
+
+    <div class="result-subsection">
+      <h3 class="title is-4 has-text-centered">Point Cloud Comparison</h3>
+      <div class="result-fig">
+        <img src="assets/figures/pc_vis.png"
+             alt="Point cloud visualization">
+        <p class="has-text-centered" style="margin-top: 0.6rem; font-size: 14px; color: #555;">
+          <strong>Point cloud visualization.</strong>
+          MERG3R preserves fine-grained geometric details in both large outdoor scenes
+          (Tanks &amp; Temples) and challenging indoor environments.
+        </p>
+      </div>
+    </div> 
+
+    <div class="result-subsection">
+      <h3 class="title is-4 has-text-centered">Large-Scale Reconstruction Comparison</h3>
+      <div class="result-fig">
+        <section class="hero is-small">
+          <div class="hero-body">
+            <div class="container">
+              <div id="zipnerf-compare-carousel" class="carousel results-carousel">
+                <div class="item">
+                  <img src="assets/figures/zipnerf_compare/alameda.jpg" alt="Alameda comparison" loading="lazy">
+                </div>
+                <div class="item">
+                  <img src="assets/figures/zipnerf_compare/berlin.jpg" alt="Berlin comparison" loading="lazy">
+                </div>
+                <div class="item">
+                  <img src="assets/figures/zipnerf_compare/london.jpg" alt="London comparison" loading="lazy">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <p class="has-text-centered" style="margin-top: -0.5rem; font-size: 14px; color: #555;">
+          <strong>Large-scale reconstruction comparison.</strong>
+          MERG3R achieves consistently better performance on the challenging Zip-NeRF~\cite{barron2023zip} scenes.
+        </p>
+      </div>
+    </div>
+
+
+
+  </div>
+</section>
+
+
+<!-- ══════════════ BIBTEX ══════════════ -->
+<section class="section" id="BibTeX" style="background: #fafafa;">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre class="bibtex-pre"><code>@article{cheng2025merg3r,
+  title   = {{MERG3R}: A Divide-and-Conquer Approach to Large-Scale Neural Visual Geometry},
+  author  = {Cheng, Leo Kaixuan and Shaikh, Abdus and Liang, Ruofan and
+             Wu, Zhijie and Guan, Yushi and Vijaykumar, Nandita},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</code></pre>
+  </div>
+</section>
+
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is built using the
+            <a href="https://github.com/nerfies/nerfies.github.io" target="_blank">Nerfies</a>
+            project page template, which is licensed under a
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">
+              Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof bulmaCarousel !== 'undefined') {
+      var carouselOptions = {
+        slidesToScroll: 1,
+        slidesToShow: 1,
+        loop: true,
+        infinite: true,
+        autoplay: false,
+        navigation: true,
+        pagination: true
+      };
+      bulmaCarousel.attach('#zipnerf-compare-carousel', carouselOptions);
+    }
+  });
+</script>
+</body>
+</html>
