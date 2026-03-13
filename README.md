@@ -177,6 +177,38 @@ python eval/evaluate_error.py \
   --path outputs/barn/direct_run/relative_metrics.txt
 ```
 
+## Using Alternative Backbones
+1. Modify the load_model function in algos/utils.py
+
+```
+def load_model(model_name="vggt", device=None):
+    ...
+    
+    if model_name == 'vggt':
+        model = VGGT.from_pretrained("facebook/VGGT-1B")
+    elif model_name == 'pi3':
+        model = Pi3.from_pretrained("yyfz233/Pi3")
+    elif model_name == 'YOUR_MODEL':
+        model = YOUR_MODEL
+    
+    ...
+```
+
+2. Modify the run_inference_step_by_step function in algos/utils.py
+
+```
+def run_inference_step_by_step(model, batches, size_hw, device, need_features=False):
+    ...
+    if isinstance(model, VGGT):
+        ...
+    elif isinstance(model, Pi3):
+        ...
+    elif isinstance(model, YOUR_MODEL):
+        ...
+```
+The `prediction` dictionary must have at least 'extrinsic', 'world_points', 'depth_conf', 'intrinsic', and 'depth' fields populated for the pipeline to work. Please refer to the existing code for implementation details.
+
+
 ## License
 
 See `LICENSE.txt`.
