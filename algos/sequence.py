@@ -531,8 +531,8 @@ class ShortestPath(Sequence):
                 old_start = start
                 
                 for i in range(old_start, len(self.path)):
-                    threshold1 = torch.quantile(self.sim_matrix[start], 1.00)
-                    threshold2 = torch.quantile(self.sim_matrix[start], 0.50)
+                    threshold1 = torch.quantile(self.sim_matrix[self.path[start]], 1.00)
+                    threshold2 = torch.quantile(self.sim_matrix[self.path[start]], 0.50)
 
                     if (not picked[i]) and (self.sim_matrix[self.path[start]][self.path[i]] <= threshold1) and (self.sim_matrix[self.path[start]][self.path[i]] >= threshold2):
                         new_path.append(self.path[i])
@@ -558,8 +558,8 @@ class ShortestPath(Sequence):
                 old_start = start
                 
                 for i in range(old_start, len(self.path)):
-                    threshold1 = torch.quantile(self.sim_matrix[start], 1.00)
-                    threshold2 = torch.quantile(self.sim_matrix[start], 0.50)
+                    threshold1 = torch.quantile(self.sim_matrix[self.path[start]], 1.00)
+                    threshold2 = torch.quantile(self.sim_matrix[self.path[start]], 0.50)
 
                     if (not picked[i]) and (self.sim_matrix[self.path[start]][self.path[i]] <= threshold1) and (self.sim_matrix[self.path[start]][self.path[i]] >= threshold2):
                         new_path.append(self.path[i])
