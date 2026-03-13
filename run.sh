@@ -30,7 +30,7 @@ python main.py \
   --alignment_type weighted_iterative \
   --subset_size 100 \
   --overlap 5 \
-  --num_images 150 \
+  --num_images -1 \
   --subsample 1 \
   --splitting_type interleave \
   --tracking_type graph \
@@ -41,4 +41,5 @@ python main.py \
   --stride 10 \
   --alpha 0.7 \
   --point_vis_threshold 20.0 \
+  --format "bin" \
   "$@"

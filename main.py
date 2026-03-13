@@ -36,6 +36,7 @@ def parse_args():
     parser.add_argument("--tracking_type", type=str, default="graph", choices=['graph', 'video'])
     parser.add_argument("--alpha", type=float, default=0.8)
     parser.add_argument("--splitting_type", type=str, default="interleave", choices=['interleave', 'zigzag', 'threshold', "original", "original_threshold"])
+    parser.add_argument("--format", type=str, default="txt", choices=['txt', 'bin'])
     args = parser.parse_args()
 
     
@@ -204,7 +205,7 @@ def main():
         f.write(f"BA Time: {ba_end - ba_start} seconds\n")
         f.write(f"Peak GPU memory: {peak_mem:.2f} MiB\n")
 
-    write_recon_to_colmap(args.output_dir, final_predictions, sequence.images, sequence.image_names, stride=args.stride, conf_threshold=args.point_vis_threshold)
+    write_recon_to_colmap(args.output_dir, final_predictions, sequence.images, sequence.image_names, stride=args.stride, conf_threshold=args.point_vis_threshold, format=args.format)
     
 
 if __name__ == "__main__":
