@@ -115,9 +115,9 @@ You can set `--splitting_type` to one of `interleave`, `original`, `zigzag`, or 
 ### Tips on choosing the right parameters
 - splitting_type
   - original: No reordering, keep frames in the original sequence order
-  - threshold: Reorder so that adjacent frames are at least within the 50th percentile of eachother similarity distribution
+  - threshold: Reorder so that adjacent frames are at least within the 50th percentile of each other similarity distribution
   - original_threshold: Similar to threshold but start from first image in the original ordering
-  - zigzag: Best when visual content oscilates (e.g back-and-forth movement through a corridor). Suitable for long sequence
+  - zigzag: Best when visual content oscillates (e.g back-and-forth movement through a corridor). Suitable for long sequences
   - interleave: Distribute scene information evenly across subsets. Suitable for short to medium sequences
   
 
@@ -239,7 +239,7 @@ See `LICENSE.txt`.
 If you use this codebase in your research, please cite:
 
 ```bibtex
-@article{cheng2025merg3r,
+@article{cheng2026merg3r,
   title   = {{MERG3R}: A Divide-and-Conquer Approach to Large-Scale Neural Visual Geometry},
   author  = {Cheng, Leo Kaixuan and Shaikh, Abdus and Liang, Ruofan and
              Wu, Zhijie and Guan, Yushi and Vijaykumar, Nandita},
