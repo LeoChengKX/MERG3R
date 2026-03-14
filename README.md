@@ -110,7 +110,28 @@ bash run.sh <dataset_path> <output_dir> [extra main.py args...]
 - `--max_reproj 8.0`
 - `--global_ba` enabled
 
-You can set `--splitting_type` to one of `interleave`, `original`, `zigzag`, or `original_threshold` depending on your use case. 
+You can set `--splitting_type` to one of `interleave`, `original`, `zigzag`, or `original_threshold` depending on your use case.
+
+### Tips on choosing the right parameters
+- splitting_type
+  - original: No reordering, keep frames in the original sequence order
+  - threshold: Reorder so that adjacent frames are at least within the 50th percentile of eachother similarity distribution
+  - original_threshold: Similar to threshold but start from first image in the original ordering
+  - zigzag: Best when visual content oscilates (e.g back-and-forth movement through a corridor). Suitable for long sequence
+  - interleave: Distribute scene information evenly across subsets. Suitable for short to medium sequences
+  
+
+- subset_size
+  - Larger subsets are good if you want a high quality reconstruction and are willing to consume more vram
+  - Smaller subsets are good if you want to prioritize scalability at a slight hit to accuracy
+
+- overlap
+  - High: Increases local reconstruction time for possibly better alignment
+  - Low: Slightly faster local reconstruction at the potential cost of alignment quality
+
+- global_ba
+  - Disable if you prioritize speed over reconstruction quality
+  - Enable if you prioritize reconstruction quality over speed
 
 ## Direct Pipeline Invocation
 
